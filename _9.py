@@ -34,13 +34,13 @@ def _a():
             continue
 
         new_storage[new_storage.index('.')] = char
-        new_storage[-(i+1)] = '.'
+        new_storage[-(i + 1)] = '.'
 
         # all dots are at the end of the list
         if ''.join(new_storage).endswith('.' * free_space):
             break
 
-    checksum = sum(list(i*int(char) for i, char in enumerate(new_storage) if char != '.'))
+    checksum = sum(list(i * int(char) for i, char in enumerate(new_storage) if char != '.'))
     return checksum
 
 
@@ -57,32 +57,51 @@ def _b():
             block = [[str(id)] * int(char)]
         else:
             if char != '0':
-                block += ['.' * int(char)]
+                block += [['.'] * int(char)]
             id += 1
             all_storage += block
     if not block[-1] == '.':
         all_storage += block
-    print(all_storage)
 
     # sort into new storage
-    free_space = all_storage.count('.')
     new_storage = deepcopy(all_storage)
-    for i, num_lis in enumerate(all_storage[::-1]):
-        if '.' in num_lis:
+    for section in all_storage[::-1]:
+        if '.' in section:
             continue
-        print(num_lis)
 
-        space_needed = len(''.join(num_lis))
-        inx = [_i for _i, item in enumerate(new_storage[:len(new_storage)-i]) if isinstance(item, str) and len(item) >= space_needed]
-        if len(inx) == 0:  # no space
+        section_inx = new_storage.index(section)
+        space_needed = len(section)
+        space_inx = [_i for _i, item in enumerate(new_storage[:section_inx]) if
+                     item[0] == '.' and len(item) >= space_needed]
+
+        # no space :(
+        if len(space_inx) == 0:
             continue
-        print(inx[0])
-        new_storage[inx[0]] = num_lis
-        # new_storage[-(i + 1)] = '.'
 
-        # all dots are at the end of the list
-        # if ''.join(new_storage).endswith('.' * free_space):
-        #     break
-    #
-    # checksum = sum(list(i * int(char) for i, char in enumerate(new_storage) if char != '.'))
-    # return checksum
+        # remove space where section is to be moved into
+        space_inx = space_inx[0]
+        space = len(new_storage[space_inx])
+        if space == space_needed:
+            new_storage.pop(space_inx)
+        else:
+            new_storage[space_inx] = ['.'] * (space - space_needed)
+
+        # place section
+        new_storage.insert(space_inx, section)
+
+        # override old section with empty space
+        old_inx = new_storage.index(section, space_inx + 1)
+        new_storage[old_inx] = ['.'] * space_needed
+
+        # merge empty spaces if they're next to each other
+        if new_storage[old_inx - 1][0] == '.':
+            new_storage[old_inx - 1] += new_storage[old_inx]
+            new_storage.pop(old_inx)
+            old_inx -= 1
+        if old_inx + 1 < len(new_storage) and new_storage[old_inx + 1][0] == '.':
+            new_storage[old_inx + 1] += new_storage[old_inx]
+            new_storage.pop(old_inx)
+
+    new_storage = [num for section in new_storage for num in section]
+    checksum = sum(list(i * int(num) for i, num in enumerate(new_storage) if num != '.'))
+    return checksum
