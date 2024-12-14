@@ -24,32 +24,35 @@ def _a():
             else:
                 new_stones.append(str(int(stone) * 2024))
         stones = new_stones
-        # print(stones)
     return len(stones)
 
 
 def _b():
     stones = read_file(11).split(' ')
-    blink_times = 25
+    blink_times = 75
+    cache = {}
 
     def do_stone(the_stone: str, iteration: int):
         if iteration == blink_times:
             return 0
 
+        key = f'{iteration}-{the_stone}'
+        if key in cache:
+            return cache[key]
+
+        count = 0
         if int(the_stone) == 0:
-            return do_stone('1', iteration + 1)
+            count += do_stone('1', iteration + 1)
         elif len(the_stone) % 2 == 0:
             mid = int(len(the_stone) * .5)
-            a = do_stone(the_stone[:mid], iteration + 1)
-            return 1 + a + do_stone(str(int(the_stone[mid:])), iteration + 1)
+            count += do_stone(the_stone[:mid], iteration + 1)
+            count += 1 + do_stone(str(int(the_stone[mid:])), iteration + 1)
         else:
-            return do_stone(str(int(the_stone) * 2024), iteration + 1)
+            count += do_stone(str(int(the_stone) * 2024), iteration + 1)
+        cache[key] = count
+        return count
 
     total_count = len(stones)
     for starting_stone in stones:
-        pass
-        # print(starting_stone)
-        # total_count += do_stone(starting_stone, 0)
-
-        # print(tb, tc)
+        total_count += do_stone(starting_stone, 0)
     return total_count
