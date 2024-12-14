@@ -11,11 +11,7 @@ from utils import read_file
 def _a():
     lines = read_file(8).split('\n')
 
-    points = []
-    for y, line in enumerate(lines):
-        for x, char in enumerate(line):
-            if char != '.':
-                points.append([x, y, char])
+    points = [[x, y, char] for y, line in enumerate(lines) for x, char in enumerate(line) if char != '.']
 
     locations = []
     for inx_a, p_a in enumerate(points):
@@ -40,11 +36,7 @@ def _a():
 def _b():
     lines = read_file(8).split('\n')
 
-    points = []
-    for y, line in enumerate(lines):
-        for x, char in enumerate(line):
-            if char != '.':
-                points.append([x, y, char])
+    points = [[x, y, char] for y, line in enumerate(lines) for x, char in enumerate(line) if char != '.']
 
     locations = []
     for inx_a, p_a in enumerate(points):
