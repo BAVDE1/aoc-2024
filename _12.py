@@ -66,8 +66,8 @@ def _b():
     lines = read_file(12).split('\n')
     placed = []
 
-    def add(pos, addition):
-        return [pos[0] + addition[0], pos[1] + addition[1]]
+    def add(position, addition):
+        return [position[0] + addition[0], position[1] + addition[1]]
 
     def find_relatives(x, y):
         needed_char = lines[y][x]
@@ -117,7 +117,7 @@ def _b():
                 if neighbour_pos not in group:
                     perimeters.append(neighbour_pos)
 
-        checked_list = [[], [], [], []]
+        checked_list = [[], [], [], []]  # 0: up, 1: down, 2: left, 3: right
         sides = 0
 
         # find sides
@@ -134,19 +134,21 @@ def _b():
 
                 checked.append(perimeter)
 
+                # move perpendicular to the checking direction (both ways)
+                # until it runs out of perimeter, or the checking direction relative to the check_pos is not in the group
                 def check_in_direction(addition):
                     check_pos = add(perimeter, addition)
                     while check_pos in perimeters:
                         checked.append(deepcopy(check_pos))
-                        if add(check_pos, check_direction) not in group:
+                        if add(check_pos, check_direction) not in group:  # nothing is there, stop!
                             break
                         check_pos = add(check_pos, addition)
 
                 if direction < 2:
-                    check_in_direction([1, 0])
-                    check_in_direction([-1, 0])
+                    check_in_direction([1, 0])  # right
+                    check_in_direction([-1, 0])  # left
                 else:
-                    check_in_direction([0, 1])
-                    check_in_direction([0, -1])
+                    check_in_direction([0, 1])  # down
+                    check_in_direction([0, -1])  # up
         total += area * sides
     return total
