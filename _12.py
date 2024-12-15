@@ -109,7 +109,7 @@ def _b():
     for group in groups:
         area = len(group)
 
-        # find all spaces surrounding the group
+        # find all spaces surrounding the group (perimeter)
         perimeters = []
         for pos in group:
             for neighbour_add in NEIGHBOUR_ADDITIONS:
