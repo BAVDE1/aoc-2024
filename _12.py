@@ -8,6 +8,8 @@ from copy import deepcopy
 from utils import read_file
 
 
+NEIGHBOUR_ADDITIONS = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+
 def _a():
     lines = read_file(12).split('\n')
     placed = []
@@ -16,7 +18,7 @@ def _a():
         needed_char = lines[y][x]
 
         f = []
-        for neighbour in [[0, -1], [1, 0], [0, 1], [-1, 0]]:
+        for neighbour in NEIGHBOUR_ADDITIONS:
             neighbour_pos = [x + neighbour[0], y + neighbour[1]]
             if neighbour_pos in placed:
                 continue
@@ -33,6 +35,7 @@ def _a():
             f += find_relatives(neighbour_pos[0], neighbour_pos[1])
         return f
 
+    # build groups
     groups = []
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
@@ -45,12 +48,13 @@ def _a():
             found += find_relatives(x, y)
             groups.append(found)
 
+    # find perimeters & add up total
     total = 0
     for group in groups:
         area = len(group)
         perimeter = 0
         for pos in group:
-            for neighbour in [[0, -1], [1, 0], [0, 1], [-1, 0]]:
+            for neighbour in NEIGHBOUR_ADDITIONS:
                 neighbour_pos = [pos[0] + neighbour[0], pos[1] + neighbour[1]]
                 if neighbour_pos not in group:
                     perimeter += 1
@@ -62,12 +66,15 @@ def _b():
     lines = read_file(12).split('\n')
     placed = []
 
+    def add(pos, addition):
+        return [pos[0] + addition[0], pos[1] + addition[1]]
+
     def find_relatives(x, y):
         needed_char = lines[y][x]
 
         f = []
-        for neighbour in [[0, -1], [1, 0], [0, 1], [-1, 0]]:
-            neighbour_pos = [x + neighbour[0], y + neighbour[1]]
+        for neighbour_add in NEIGHBOUR_ADDITIONS:
+            neighbour_pos = add([x, y], neighbour_add)
             if neighbour_pos in placed:
                 continue
 
@@ -84,6 +91,7 @@ def _b():
             f += find_relatives(neighbour_pos[0], neighbour_pos[1])
         return f
 
+    # build groups
     groups = []
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
@@ -96,82 +104,49 @@ def _b():
             found += find_relatives(x, y)
             groups.append(found)
 
+    # find total
     total = 0
     for group in groups:
         area = len(group)
+
+        # find all spaces surrounding the group
         perimeters = []
         for pos in group:
-            for neighbour in [[0, -1], [1, 0], [0, 1], [-1, 0]]:
-                neighbour_pos = [pos[0] + neighbour[0], pos[1] + neighbour[1]]
+            for neighbour_add in NEIGHBOUR_ADDITIONS:
+                neighbour_pos = add(pos, neighbour_add)
                 if neighbour_pos not in group:
                     perimeters.append(neighbour_pos)
 
-        checked_h = []
-        checked_v = []
-        checked_u = []
-        checked_d = []
-        checked_l = []
-        checked_r = []
-        checked_list = [checked_u, checked_d, checked_l, checked_r]
+        checked_list = [[], [], [], []]
         sides = 0
 
+        # find sides
         for perimeter in perimeters:
-            # for direction, checked in enumerate(checked_list):
-            #     if (direction < 2 and (perimeter in checked_l or perimeter in checked_r)) \
-            #             or (direction > 1 and (perimeter in checked_u or perimeter in checked_d)):
-            #         continue
-            #
-            #     check_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][direction]
-            #     neighbour_pos = [perimeter[0] + check_direction[0], perimeter[1] + check_direction[1]]
-            #     if neighbour_pos in group and neighbour_pos not in checked:
-            #         checked.append(neighbour_pos)
-            #         sides += 1
-            #
-            #     checked.append(perimeter)
-            #     check_next = [perimeter[0] + check_direction[0], perimeter[1] + check_direction[1]]
-            #     while check_next in perimeters:
-            #         checked.append(deepcopy(check_next))
-            #         check_next[0] += check_direction[0]
-            #         check_next[1] += check_direction[1]
+            for direction, checked in enumerate(checked_list):
+                if perimeter in checked:
+                    continue
 
-            if perimeter in checked_h and perimeter in checked_v:
-                continue
-            print(perimeter)
-            if perimeter not in checked_v:
-                # add sides of how many its touching
-                for neighbour in [[-1, 0], [1, 0]]:
-                    neighbour_pos = [perimeter[0] + neighbour[0], perimeter[1] + neighbour[1]]
-                    if neighbour_pos in group:
-                        print(neighbour_pos)
-                        sides += 1
+                check_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][direction]  # the order is important!
+                if add(perimeter, check_direction) in group:
+                    sides += 1
+                else:
+                    continue
 
-                checked_v.append(perimeter)
-                up = [perimeter[0], perimeter[1] - 1]
-                while up in perimeters:
-                    checked_v.append(deepcopy(up))
-                    up[1] -= 1
-                down = [perimeter[0], perimeter[1] + 1]
-                while down in perimeters:
-                    checked_v.append(deepcopy(down))
-                    down[1] += 1
+                checked.append(perimeter)
 
-            if perimeter not in checked_h:
-                # add sides of how many its touching
-                for neighbour in [[0, 1], [0, -1]]:
-                    neighbour_pos = [perimeter[0] + neighbour[0], perimeter[1] + neighbour[1]]
-                    if neighbour_pos in group:
-                        print(neighbour_pos)
-                        sides += 1
+                def check_in_direction(addition):
+                    check_pos = add(perimeter, addition)
+                    while check_pos in perimeters:
+                        checked.append(deepcopy(check_pos))
+                        if add(check_pos, check_direction) not in group:
+                            break
+                        check_pos = add(check_pos, addition)
 
-                checked_h.append(perimeter)
-                left = [perimeter[0] - 1, perimeter[1]]
-                while left in perimeters:
-                    checked_h.append(deepcopy(left))
-                    left[0] -= 1
-                right = [perimeter[0] + 1, perimeter[1]]
-                while right in perimeters:
-                    checked_h.append(deepcopy(right))
-                    right[0] += 1
-        print(sides)
+                if direction < 2:
+                    check_in_direction([1, 0])
+                    check_in_direction([-1, 0])
+                else:
+                    check_in_direction([0, 1])
+                    check_in_direction([0, -1])
         total += area * sides
     return total
