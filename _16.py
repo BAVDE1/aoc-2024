@@ -4,6 +4,8 @@ import pprint
 import re
 import time
 from copy import deepcopy
+from collections import deque
+
 
 from utils import read_file
 
@@ -12,9 +14,6 @@ UP = 0
 DOWN = 1
 LEFT = 2
 RIGHT = 3
-
-STRAIGHT_POINTS = 1
-TURN_POINTS = 1000
 
 
 def _a():
@@ -25,59 +24,53 @@ def _a():
         addition = [[0, -1], [0, 1], [-1, 0], [1, 0]][direction]
         return [position[0] + addition[0], position[1] + addition[1]]
 
-    # returns list of possible directions perpendicular to given direction
-    def perp_routes(pos, direction):
-        directions = []
-        to_check = [RIGHT, LEFT] if direction in [UP, DOWN] else [UP, DOWN]
-        for i, checking_direction in enumerate(to_check):
-            d_pos = add(pos, checking_direction)
-            if the_map[d_pos[1]][d_pos[0]] != '#':
-                directions.append(checking_direction)
-        return directions
+    def get_neighbours(pos):
+        lis = []
+        for direction in [UP, DOWN, LEFT, RIGHT]:
+            neighbour_pos = add(pos, direction)
+            if the_map[neighbour_pos[1]][neighbour_pos[0]] != '#':
+                lis.append(neighbour_pos)
+        return lis
 
-    start_pos = [[x, y] for y, line in enumerate(lines) for x, char in enumerate(line) if char == 'S'][0]
-    possible_routes = []
-    lowest_pivot = [140]
-    lowest_score = [10e10]
+    positions = []
+    start_pos = []
+    for y, line in enumerate(lines):
+        lis = []
+        for x, char in enumerate(line):
+            lis.append(False)
+            if char == 'S':
+                start_pos = [x, y]
+        positions.append(lis)
 
-    def try_route(position, move_direction, accumulated_pivots, accumulated_moves, visited):
-        the_char = the_map[position[1]][position[0]]
-        moving = False
+    queue = deque()
+    queue.append([start_pos, RIGHT, 0])
 
-        while the_char != '#':
-            if position in visited:
-                break
-            accumulated_moves += int(moving)
-            moving = True
+    cache = {}  # key: pos-direction, value: score
 
-            # found one route & check if score is less than the current lowest
-            if the_char == 'E':
-                route_stats = [accumulated_pivots, accumulated_moves]
-                if route_stats not in possible_routes:
-                    possible_routes.append(route_stats)
+    lowest_score = 10e10
+    while queue:
+        pos, facing_direction, score = queue.popleft()
 
-                    score = (route_stats[0] * 1000) + route_stats[1]
-                    if score < lowest_score[0]:
-                        lowest_pivot[0] = route_stats[0]
-                        lowest_score[0] = score
-                        print(lowest_pivot, lowest_score)
-                break
+        key = f'{pos}-{facing_direction}'
+        if key in cache and cache[key] < score:  # already found a better route this way, don't bother
+            continue
+        cache[key] = score
 
-            # branch off
-            for branch_direction in perp_routes(position, move_direction):
-                if accumulated_pivots + 1 > lowest_pivot[0]:  # don't even bother
-                    return
-                visited.append(position)
-                try_route(add(position, branch_direction), branch_direction, accumulated_pivots + 1, accumulated_moves + 1, deepcopy(visited))
+        if the_map[pos[1]][pos[0]] == 'E':
+            if score < lowest_score:
+                lowest_score = score
+            continue
 
-            position = add(position, move_direction)
-            the_char = the_map[position[1]][position[0]]
-
-    t = time.time()
-    try_route(start_pos, RIGHT, 0, 0, [])
-    print(time.time() - t)
-    return lowest_score[0]
+        moves = [UP, DOWN, LEFT, RIGHT]
+        moves.remove([DOWN, UP, RIGHT, LEFT][facing_direction])
+        for direction in moves:
+            next_pos = add(pos, direction)
+            if the_map[next_pos[1]][next_pos[0]] == '#':
+                continue
+            next_score = score + (1 if direction == facing_direction else 1001)
+            queue.append([next_pos, direction, next_score])
+    return lowest_score
 
 
 def _b():
-    lines = read_file(16).split('\n')
+    pass
