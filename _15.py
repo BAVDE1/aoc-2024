@@ -96,20 +96,20 @@ def _b():
             # offset one or the other to either the left or the right
             pos_left = add([x, y], LEFT if is_right else None)
             pos_right = add([x, y], RIGHT if not is_right else None)
-            next_x_l, next_y_l = add(pos_left, direction)
-            next_x_r, next_y_r = add(pos_right, direction)
+            next_x_left, next_y_left = add(pos_left, direction)
+            next_x_right, next_y_right = add(pos_right, direction)
 
-            if (direction in [UP, DOWN] and push(next_x_r, next_y_r, direction, True) and push(next_x_l, next_y_l, direction, True)) or \
-                    (direction == LEFT and push(next_x_l, next_y_l, direction)) or \
-                    (direction == RIGHT and push(next_x_r, next_y_r, direction)):
+            if (direction in [UP, DOWN] and push(next_x_right, next_y_right, direction, True) and push(next_x_left, next_y_left, direction, True)) or \
+                    (direction == LEFT and push(next_x_left, next_y_left, direction)) or \
+                    (direction == RIGHT and push(next_x_right, next_y_right, direction)):
                 if not mock:
                     if direction in [UP, DOWN]:
-                        push(next_x_r, next_y_r, direction)  # run these again but without mocking
-                        push(next_x_l, next_y_l, direction)
+                        push(next_x_right, next_y_right, direction)  # run these again but without mocking
+                        push(next_x_left, next_y_left, direction)
                     the_map[pos_left[1]][pos_left[0]] = '.'
                     the_map[pos_right[1]][pos_right[0]] = '.'
-                    the_map[next_y_l][next_x_l] = '['
-                    the_map[next_y_r][next_x_r] = ']'
+                    the_map[next_y_left][next_x_left] = '['
+                    the_map[next_y_right][next_x_right] = ']'
                 return True
             return False
         return char == '.'
