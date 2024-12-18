@@ -34,7 +34,7 @@ def _a():
     while queue:
         pos, facing_direction, score = queue.popleft()
 
-        # already found a better route this way, don't bother
+        # already found a better route this way, don't bother (also prevents loops)
         key = f'{pos}-{facing_direction}'
         if key in cache and cache[key] < score:
             continue
@@ -77,7 +77,7 @@ def _b():
     while queue:
         pos, facing_direction, score, path = queue.popleft()
 
-        # already found a better route this way, don't bother
+        # already found a better route this way, don't bother (also prevents loops)
         key = f'{pos}-{facing_direction}'
         if key in cache and cache[key] < score:
             continue
