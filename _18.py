@@ -35,7 +35,6 @@ def _a():
     queue = [[start_pos, 0]]
     visited = []
 
-    t = time.time()
     while queue:
         # queue = sorted(queue, key=lambda i: i[1])
         pos, move_c = queue.pop(0)
@@ -57,7 +56,6 @@ def _a():
                 continue
             visited.append(next_pos)
             queue.append([next_pos, move_c + 1])
-    print(time.time() - t)
     return lowest_move_c
 
 
@@ -71,9 +69,9 @@ def _b():
 
     end_pos = [WIDTH, HEIGHT]
     blocked = False
-    bytes = 1024
+    bytes = 24
 
-    ascending = False
+    ascending = True
     addition = 1000
 
     while not blocked:
@@ -109,8 +107,8 @@ def _b():
         # flip the checking direction
         if (ascending and lowest_move_c == 10e10) or (not ascending and lowest_move_c < 10e10):
             ascending = not ascending
-            addition /= 2
+            addition /= 50
 
-            if addition < .2:
+            if addition < 1:
                 blocked = lowest_move_c == 10e10
     return all_corrupted_spaces[bytes-1]
