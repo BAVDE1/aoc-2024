@@ -69,13 +69,14 @@ def _b():
 
     end_pos = [WIDTH, HEIGHT]
     blocked = False
-    bytes = 24
+    bytes = 0
 
     ascending = True
     addition = 1000
 
     while not blocked:
         bytes += math.ceil(addition) if ascending else -math.ceil(addition)
+        print('---', bytes)
         lowest_move_c = 10e10
         queue = deque()
         queue.append([[0, 0], 0])
@@ -105,10 +106,10 @@ def _b():
                 queue.append([next_pos, move_c + 1])
 
         # flip the checking direction
+        # lmao this is so goofy, i love it though
         if (ascending and lowest_move_c == 10e10) or (not ascending and lowest_move_c < 10e10):
             ascending = not ascending
-            addition /= 50
-
-            if addition < 1:
+            addition /= 10  # lower for more accuracy
+            if addition < .5:  # ^^^
                 blocked = lowest_move_c == 10e10
     return all_corrupted_spaces[bytes-1]
