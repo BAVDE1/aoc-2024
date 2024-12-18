@@ -82,7 +82,7 @@ def _a():
 
 def _b():
     registers, instructions = read_file(17).split('\n\n')
-    registers = []
+    registers = [0 for n in re.findall('\d+', registers)]
     instructions = [int(n) for n in re.findall('\d+', instructions)]
 
     output = []
@@ -148,17 +148,11 @@ def _b():
 
     instruction_jump_table = {0: adv, 1: bxl, 2: bst, 3: jnz, 4: bxc, 5: out, 6: bdv, 7: cdv}
 
-    i = 0
-    while output != expected_output:
-        registers = [i, 0, 0]
-        instruction_pointer[0] = 0
-        i += 1
-        output = []
+    instruction_pointer[0] = len(instructions) - 2
+    while instruction_pointer[0] >= 0:
+        ptr = instruction_pointer[0]
+        opcode, operand = instructions[ptr], instructions[ptr+1]
 
-        while instruction_pointer[0] < len(instructions):
-            ptr = instruction_pointer[0]
-            opcode, operand = instructions[ptr], instructions[ptr+1]
-
-            pointer_addition = instruction_jump_table[opcode].__call__(operand)
-            instruction_pointer[0] += pointer_addition
-    return i-1
+        pointer_addition = instruction_jump_table[opcode].__call__(operand)
+        instruction_pointer[0] -= pointer_addition
+    return output
